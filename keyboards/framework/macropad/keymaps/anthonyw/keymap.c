@@ -5,9 +5,9 @@
 #include "factory.h"
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-     /*
+    /* Just a numpad (except for the top row)
      *         ┌────┬────┬────┬────┐
-     *  4 keys │Esc │Calc│ =  │ <- │
+     *  4 keys │ L++|    │MUTE│MICM│
      *         ├────┼────┼────┼────┤
      *  4 keys │ Num│ /  │ *  │ -  │
      *         ├────┼────┼────┼────┤
@@ -18,48 +18,57 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      *  3 keys │ 1  │ 2  │ 3  │Entr│
      *         ├────┼────┼────┼────┤
      *  3 keys │ 0  │ 0  │ .  │Entr│
-     *         └────┴────┴────┴────┴
+     *         └────┴────┴────┴────┘
      * 21 total
      */
-    [_NUMLOCK] = LAYOUT(
-        KC_ESC,  KC_CALC, KC_EQL,  KC_BSPC,
-        KC_NUM,  KC_PSLS, KC_PAST, KC_PMNS,
-        KC_P7,   KC_P8,   KC_P9,   KC_PPLS,
-        KC_P4,   KC_P5,   KC_P6,   KC_PPLS,
-        KC_P1,   KC_P2,   KC_P3,   KC_PENT,
-        KC_P0,   KC_P0,   KC_PDOT, KC_PENT
+    [_NUMPAD] = LAYOUT(
+        TO(_MACRO0), KC_NO,   KC_MUTE, G(KC_MUTE),
+        KC_NUM,      KC_PSLS, KC_PAST, KC_PMNS,
+        KC_P7,       KC_P8,   KC_P9,   KC_PPLS,
+        KC_P4,       KC_P5,   KC_P6,   KC_PPLS,
+        KC_P1,       KC_P2,   KC_P3,   KC_PENT,
+        KC_P0,       KC_P0,   KC_PDOT, KC_PENT
     ),
-     /*
-     *         ┌───────┬───────┬───────┬───────┐
-     *  4 keys │ RGB   │ RGB + │ RGB + │ RGB + │
-     *         │Toggle │ Speed │ Hue   │ Sat   │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys │Numlock│ RGB - │ RGB - │ RGB - │
-     *         │       │ Speed │ Hue   │ Sat   │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys │ Home  │   ↑   │ Page  │RGB Nxt│
-     *         │       │       │ Up    │Effect │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys │  ←    │       │   →   │RGB Prv│
-     *         │       │       │       │Effect │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys │ End   │  ↓    │ Page  │ BL    │
-     *         │       │       │ Down  │ Step  │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys │ Insert│ Insert│ Delete│ BL    │
-     *         │       │       │       │ Step  │
-     *         └───────┴───────┴───────┴───────┘
-     * 24 total
-     */
-    [_FN] = LAYOUT(
-        RGB_TOG, RGB_SPI, RGB_HUI, RGB_SAI,
-        _______, RGB_SPD, RGB_HUD, RGB_SAD,
-        _______, _______, _______, RGB_MOD,
-        _______, _______, _______, RGB_RMOD,
-        _______, _______, _______, BL_STEP,
-        _______, _______, _______, BL_STEP
+    
+    // My custom quick-access & navigation layouts
+    [_MACRO0] = LAYOUT(
+        TO(_MACRO1),  KC_TRNS,      KC_TRNS,      KC_TRNS,
+        C(S(KC_F17)), C(S(KC_F18)), C(S(KC_F19)), C(S(KC_F20)),
+        C(S(KC_F21)), C(S(KC_F22)), C(S(KC_F23)), C(S(KC_F24)),
+        C(KC_F13),    C(KC_F14),    C(KC_F15),    C(KC_F16),
+        C(KC_F17),    C(KC_F18),    C(KC_F19),    C(KC_F20),
+        C(KC_F21),    C(KC_F22),    C(KC_F23),    C(KC_F24)
     ),
-     /* Alphabet
+    [_MACRO1] = LAYOUT(
+        TO(_MONITOR), KC_TRNS,     KC_TRNS,     KC_TRNS,
+        C(S(KC_F17)), C(S(KC_F18)), C(S(KC_F19)), C(S(KC_F20)),
+        C(S(KC_F21)), C(S(KC_F22)), C(S(KC_F23)), C(S(KC_F24)),
+        C(KC_F13),    C(KC_F14),    C(KC_F15),    C(KC_F16),
+        C(KC_F17),    C(KC_F18),    C(KC_F19),    C(KC_F20),
+        C(KC_F21),    C(KC_F22),    C(KC_F23),    C(KC_F24)
+    ),
+    
+    // Live system stats (just pass the keys through to the numpad layer)
+    [_MONITOR] = LAYOUT(
+        TO(_APPLICATION), KC_TRNS, KC_TRNS, KC_TRNS,
+        KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS,
+        KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS,
+        KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS,
+        KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS,
+        KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS
+    ),
+    
+    // Just send key codes, and let the daemon and applications deal with them
+    [_APPLICATION] = LAYOUT(
+        TO(_NUMPAD), KC_TRNS,   KC_TRNS,   KC_TRNS,
+        S(KC_F17),   S(KC_F18), S(KC_F19), S(KC_F20),
+        S(KC_F21),   S(KC_F22), S(KC_F23), S(KC_F24),
+        KC_F13,      KC_F14,    KC_F15,    KC_F16,
+        KC_F17,      KC_F18,    KC_F19,    KC_F20,
+        KC_F21,      KC_F22,    KC_F23,    KC_F24
+    ),
+    
+    /* Alphabet
      *         ┌────┬────┬────┬────┐
      *  4 keys │ A  │ B  │ C  │ D  │
      *         ├────┼────┼────┼────┤
@@ -83,16 +92,49 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_Q,    KC_R,    KC_S,    KC_T,
         KC_U,    KC_V,    KC_W,    KC_X
     ),
+    
+    
+     /*
+     *         ┌───────┬───────┬───────┬───────┐
+     *  4 keys │ RGB   │ RGB + │ RGB + │ RGB + │
+     *         │Toggle │ Speed │ Hue   │ Sat   │
+     *         ├───────┼───────┼───────┼───────┤
+     *  4 keys │Numlock│ RGB - │ RGB - │ RGB - │
+     *         |       │ Speed │ Hue   │ Sat   │
+     *         ├───────┼───────┼───────┼───────┤
+     *  4 keys │ Home  |   ↑   | Page  |RGB Nxt│
+     *         |       |       | Up    |Effect │
+     *         ├───────┼───────┼───────┼───────┤
+     *  4 keys |  ←    |       |   →   |RGB Prv│
+     *         |       |       |       |Effect │
+     *         ├───────┼───────┼───────┼───────┤
+     *  4 keys | End   |  ↓    | Page  │ BL    │
+     *         |       |       | Down  │ Step  │
+     *         ├───────┼───────┼───────┼───────┤
+     *  4 keys | Insert| Insert| Delete│ BL    │
+     *         |       |       |       │ Step  │
+     *         └───────┴───────┴───────┴───────┘
+     * 24 total
+     */
+    //[_FN] = LAYOUT(
+    //    RGB_TOG, RGB_SPI, RGB_HUI, RGB_SAI,
+    //    _______, RGB_SPD, RGB_HUD, RGB_SAD,
+    //    _______, _______, _______, RGB_MOD,
+    //    _______, _______, _______, RGB_RMOD,
+    //    _______, _______, _______, BL_STEP,
+    //    _______, _______, _______, BL_STEP
+    //),
+    
 };
 
 bool led_update_user(led_t led_state) {
     // Change layer if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
-    if (led_state.num_lock) {
-        layer_off(_FN);
-    } else {
-        layer_on(_FN);
-    }
+    //if (led_state.num_lock) {
+    //    layer_off(_MACRO0);
+    //} else {
+    //    layer_on(_MACRO0);
+    //}
     return true;
 }
 

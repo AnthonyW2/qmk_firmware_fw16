@@ -17,7 +17,19 @@
 }
 
 enum _layers {
-  _NUMLOCK,
-  _FN,
+  // Just a numpad (except for the numlock key and the top row)
+  _NUMPAD,
+  
+  // My custom quick-access & navigation layouts
+  _MACRO0,
+  _MACRO1,
+  
+  // Live system stats
+  _MONITOR,
+  
+  // Just send key codes, and let the daemon and applications deal with them
+  _APPLICATION,
+  
+  // Just letters on all keys
   _FACTORY,
 };

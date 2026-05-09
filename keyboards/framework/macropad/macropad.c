@@ -100,14 +100,14 @@ led_config_t g_led_config = { {
 
 void keyboard_post_init_user(void) {
     // Sync initial numlock state from the host
-    if (host_keyboard_led_state().num_lock) {
-        layer_clear()
-        layer_on(_NUMLOCK);
-    } else {
-        layer_clear()
-        layer_on(_NUMLOCK);
-        layer_on(_MACRO0);
-    }
+    //if (host_keyboard_led_state().num_lock) {
+    //    layer_clear()
+    //    layer_on(_NUMPAD);
+    //} else {
+    //    layer_clear()
+    //    layer_on(_NUMPAD);
+    //    layer_on(_MACRO0);
+    //}
     
     // Wait for a connection to the daemon, which will sync audio, layer, and LED state
 }
