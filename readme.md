@@ -1,6 +1,10 @@
-# THIS IS THE DEVELOP BRANCH
+# Anthony's Custom Framework 16 RGB Macropad
 
-Warning- This is the `develop` branch of QMK Firmware. You may encounter broken code here. Please see [Breaking Changes](https://docs.qmk.fm/#/breaking_changes) for more information.
+This repository defines the QMK firmware running on my Framework 16's RGB macropad.
+
+List of modifications will be updated in the future.
+
+The source code for the daemon running on the OS will be uploaded to a separate repository in the future.
 
 # Quantum Mechanical Keyboard Firmware
 
@@ -22,14 +26,7 @@ You can request changes by making a fork and opening a [pull request](https://gi
 
 ## Supported Keyboards
 
-* [Planck](/keyboards/planck/)
-* [Preonic](/keyboards/preonic/)
-* [ErgoDox EZ](/keyboards/ergodox_ez/)
-* [Clueboard](/keyboards/clueboard/)
-* [Cluepad](/keyboards/clueboard/17/)
-* [Atreus](/keyboards/atreus/)
-
-The project also includes community support for [lots of other keyboards](/keyboards/).
+* [Framework laptop](/keyboards/framework/)
 
 ## Maintainers
 
