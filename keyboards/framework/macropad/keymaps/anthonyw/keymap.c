@@ -3,6 +3,10 @@
 
 #include QMK_KEYBOARD_H
 #include "factory.h"
+#include "raw_hid.h"
+#if defined(RGB_MATRIX_ENABLE)
+#include "rgb_matrix.h"
+#endif
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Just a numpad (except for the top row)
@@ -144,3 +148,48 @@ void enable_factory_mode(bool enable) {
     else
         layer_off(_FACTORY);
 }
+
+/**
+ * Override the handle_custom_hid function defined in /keyboards/framework/factory.c.
+ * This function defines what the macropad should do when it receives
+ * messages from the daemon running on the OS.
+ */
+void handle_custom_hid(uint8_t *data, uint8_t length) {
+    uint8_t command_id = data[0];
+    uint8_t *command_data = &(data[1]);
+    
+    uint8_t response[length];
+    memset(response, 0, length);
+    
+    // Our custom communication namespace is 0xFF
+    response[1] = 0xFF;
+    
+    // Start by identifying the type of command received
+    switch(command_id) {
+        case 0:
+            // Set layer
+            if (command_data[0] >= _NUMPAD && command_data[0] <= _APPLICATION) {
+                layer_clear();
+                layer_on(command_data[0]);
+            }
+            response[1] = 'A';
+            break;
+        case 1:
+            // Set RGB LED
+            response[1] = 'B';
+            break;
+        case 2:
+            // Set brightness
+            response[1] = 'C';
+            break;
+        default:
+            response[1] = 'Z';
+    }
+    
+    raw_hid_send(response, length);
+}
+
+// See /keyboards/framework/factory.c for raw_hid_receive defition
+//void raw_hid_receive(uint8_t *data, uint8_t length) {
+//    handle_custom_hid(data, length);
+//}
