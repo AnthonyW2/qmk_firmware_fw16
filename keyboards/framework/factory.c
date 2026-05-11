@@ -84,6 +84,11 @@ __attribute__ ((weak))
 void enable_factory_mode(bool enable) {
 }
 
+// Define custom HID handler function, overidden by user-defined code (see macropad/keymap.c)
+__attribute__ ((weak))
+void handle_custom_hid(uint8_t *data, uint8_t length) {
+}
+
 bool handle_hid(uint8_t *data, uint8_t length) {
     uint8_t command_id = data[0];
     uint8_t *command_data = &(data[1]);
@@ -104,6 +109,13 @@ bool handle_hid(uint8_t *data, uint8_t length) {
             handle_factory_command(command_data);
             // Don't let VIA handle it
             return true;
+            
+        case 0xFF:
+            // Take over the custom/unhandled command ID from via and use it for custom communication
+            handle_custom_hid(command_data, length);
+            // Don't let VIA handle it
+            return true;
+            
         default:
             //uprintf("Unrecognized command ID: %u\n", command_id);
             break;
