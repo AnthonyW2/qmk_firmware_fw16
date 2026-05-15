@@ -169,21 +169,34 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
     memset(response, 0, length);
     
     // Our custom communication namespace is 0xFF
-    response[1] = 0xFF;
+    response[0] = 0xFF;
     
     // Start by identifying the type of command received
     switch(command_id) {
         case 0:
             // Set layer
             if (command_data[0] >= _NUMPAD && command_data[0] <= _APPLICATION) {
-                layer_clear();
-                layer_on(command_data[0]);
+                layer_move(command_data[0]);
             }
-            response[1] = 'A';
+            response[1] = 0;
+            response[2] = command_data[0];
             break;
         case 1:
             // Set RGB LED
-            response[1] = 'B';
+            uint8_t index = command_data[0];
+            
+            if (index >= RGB_MATRIX_LED_COUNT) {
+                return;
+            }
+            
+            rgb_states[index].r = command_data[1];
+            rgb_states[index].g = command_data[2];
+            rgb_states[index].b = command_data[3];
+            
+            response[1] = 1;
+            response[2] = rgb_states[index].r;
+            response[3] = rgb_states[index].g;
+            response[4] = rgb_states[index].b;
             break;
         case 2:
             // Set brightness
