@@ -1,5 +1,7 @@
+# RGB matrix options
 RGB_MATRIX_ENABLE = yes
 RGB_MATRIX_DRIVER = IS31FL3743A
+#RGB_MATRIX_CUSTOM_USER = yes
 
 # Disable VIA, enable RAW HID
 VIA_ENABLE = no
