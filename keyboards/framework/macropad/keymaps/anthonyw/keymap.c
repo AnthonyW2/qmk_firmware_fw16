@@ -131,6 +131,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     
 };
 
+// Define a structure to store an LED's state
+typedef struct {
+    uint8_t r, g, b;
+} rgb_state_t;
+
+static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT];
+
 bool led_update_user(led_t led_state) {
     // Change layer if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
@@ -193,3 +200,18 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
 //void raw_hid_receive(uint8_t *data, uint8_t length) {
 //    handle_custom_hid(data, length);
 //}
+
+// Customised RGB matrix control function
+// Using custom indicators instead of effects because we need a lot more control
+bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+    for (uint8_t i = led_min; i < led_max; i++) {
+        rgb_matrix_set_color(
+            i,
+            rgb_states[i].r,
+            rgb_states[i].g,
+            rgb_states[i].b
+        );
+    }
+
+    return false;
+}
