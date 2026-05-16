@@ -165,6 +165,33 @@ bool led_update_user(led_t led_state) {
 }
 
 /**
+ * Run code on layer change
+ */
+layer_state_t layer_state_set_user(layer_state_t state) {
+    switch (get_highest_layer(state)) {
+        case _NUMPAD:
+            rgb_states[5] = (RGB){0,0,0};
+            break;
+        case _MACRO0:
+            rgb_states[5] = (RGB){255,0,0};
+            break;
+        case _MACRO1:
+            rgb_states[5] = (RGB){0,255,0};
+            break;
+        case _MONITOR:
+            rgb_states[5] = (RGB){0,0,255};
+            break;
+        case _APPLICATION:
+            rgb_states[5] = (RGB){255,0,255};
+            break;
+        default:
+            rgb_states[5] = (RGB){255,255,255};
+            break;
+    }
+  return state;
+}
+
+/**
  * Override the handle_custom_hid function defined in /keyboards/framework/factory.c.
  * This function defines what the macropad should do when it receives
  * messages from the daemon running on the OS.
