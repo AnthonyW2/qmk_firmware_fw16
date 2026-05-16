@@ -131,23 +131,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     
 };
 
-// Define a structure to store an LED's state
-typedef struct {
-    uint8_t r, g, b;
-} rgb_state_t;
-
-static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT];
+// Store the state of all RGB LEDs
+static RGB rgb_states[RGB_MATRIX_LED_COUNT];
 
 void keyboard_post_init_user(void) {
     // Sync initial numlock state from the host
     if (host_keyboard_led_state().num_lock) {
-        rgb_states[4].r = 255;
-        rgb_states[4].g = 255;
-        rgb_states[4].b = 255;
+        rgb_states[4] = (RGB){255,255,255};
     } else {
-        rgb_states[4].r = 0;
-        rgb_states[4].g = 0;
-        rgb_states[4].b = 0;
+        rgb_states[4] = (RGB){0,0,0};
     }
     
     // Wait for a connection to the daemon, which will sync audio, layer, and LED state
@@ -157,13 +149,9 @@ bool led_update_user(led_t led_state) {
     // Change RGB state if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
     if (led_state.num_lock) {
-        rgb_states[4].r = 255;
-        rgb_states[4].g = 255;
-        rgb_states[4].b = 255;
+        rgb_states[4] = (RGB){255,255,255};
     } else {
-        rgb_states[4].r = 0;
-        rgb_states[4].g = 0;
-        rgb_states[4].b = 0;
+        rgb_states[4] = (RGB){0,0,0};
     }
     return true;
 }
@@ -201,9 +189,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
                 return;
             }
             
-            rgb_states[index].r = command_data[1];
-            rgb_states[index].g = command_data[2];
-            rgb_states[index].b = command_data[3];
+            rgb_states[index] = (RGB){command_data[1], command_data[2], command_data[3]};
             
             response[1] = 1;
             response[2] = rgb_states[index].r;
