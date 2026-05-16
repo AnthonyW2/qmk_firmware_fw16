@@ -131,9 +131,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     
 };
 
-// Store the state of all RGB LEDs
+/**
+ * Store the state of all RGB LEDs
+ */
 static RGB rgb_states[RGB_MATRIX_LED_COUNT];
 
+/**
+ * Run code just after keyboard initialisation
+ */
 void keyboard_post_init_user(void) {
     // Sync initial numlock state from the host
     if (host_keyboard_led_state().num_lock) {
@@ -142,9 +147,12 @@ void keyboard_post_init_user(void) {
         rgb_states[4] = (RGB){0,0,0};
     }
     
-    // Wait for a connection to the daemon, which will sync audio, layer, and LED state
+    // [future] Wait for a connection to the daemon, which will sync audio, layer, and LED state
 }
 
+/**
+ * Run code upon LED state change (like capslock & numlock)
+ */
 bool led_update_user(led_t led_state) {
     // Change RGB state if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
@@ -207,13 +215,10 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
     raw_hid_send(response, length);
 }
 
-// See /keyboards/framework/factory.c for raw_hid_receive defition
-//void raw_hid_receive(uint8_t *data, uint8_t length) {
-//    handle_custom_hid(data, length);
-//}
-
-// Customised RGB matrix control function
-// Using custom indicators instead of effects because we need a lot more control
+/**
+ * Customised RGB matrix control function.
+ * We're using custom indicators instead of effects because we need more control.
+ */
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     for (uint8_t i = led_min; i < led_max; i++) {
         rgb_matrix_set_color(
@@ -227,6 +232,9 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     return false;
 }
 
+/**
+ * Function defined by Framework (not customised).
+ */
 void enable_factory_mode(bool enable) {
     if (enable)
         layer_on(_FACTORY);
