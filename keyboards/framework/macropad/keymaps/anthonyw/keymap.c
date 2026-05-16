@@ -173,6 +173,7 @@ bool led_update_user(led_t led_state) {
  * Run code on layer change
  */
 layer_state_t layer_state_set_user(layer_state_t state) {
+    // Update RGB state according to the new layer
     switch (get_highest_layer(state)) {
         case _NUMPAD:
             rgb_states[5] = (RGB){0,0,0};
@@ -193,7 +194,19 @@ layer_state_t layer_state_set_user(layer_state_t state) {
             rgb_states[5] = (RGB){255,255,255};
             break;
     }
-  return state;
+    
+    // Send a RAW HID message to update the daemon
+    uint8_t message[RAW_EPSIZE];
+    memset(message, 0, RAW_EPSIZE);
+    message[0] = 0xFF;
+    if (get_highest_layer(state) < 0xFF) {
+        message[1] = get_highest_layer(state);
+    } else {
+        message[1] = 0xFF;
+    }
+    raw_hid_send(message, RAW_EPSIZE);
+    
+    return state;
 }
 
 /**
