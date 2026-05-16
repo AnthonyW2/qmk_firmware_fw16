@@ -138,6 +138,21 @@ typedef struct {
 
 static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT];
 
+void keyboard_post_init_user(void) {
+    // Sync initial numlock state from the host
+    if (host_keyboard_led_state().num_lock) {
+        rgb_states[4].r = 255;
+        rgb_states[4].g = 255;
+        rgb_states[4].b = 255;
+    } else {
+        rgb_states[4].r = 0;
+        rgb_states[4].g = 0;
+        rgb_states[4].b = 0;
+    }
+    
+    // Wait for a connection to the daemon, which will sync audio, layer, and LED state
+}
+
 bool led_update_user(led_t led_state) {
     // Change RGB state if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
