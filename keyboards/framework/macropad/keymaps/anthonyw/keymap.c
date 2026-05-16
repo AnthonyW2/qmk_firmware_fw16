@@ -245,7 +245,8 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             response[2] = 255 / rgb_brightness_divisor;
             break;
         default:
-            response[1] = 'Z';
+            // Not a known command
+            response[1] = 0xFF;
     }
     
     raw_hid_send(response, length);
