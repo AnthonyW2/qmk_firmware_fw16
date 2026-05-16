@@ -137,12 +137,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 static RGB rgb_states[RGB_MATRIX_LED_COUNT];
 
 /**
+ * Convert a HSV color into RGB, limited the value according to global effect value.
+ */
+RGB hsv_to_rgb_val_lim(uint8_t h, uint8_t s, uint8_t v) {
+    HSV hsv_color = (HSV){h, s, v};
+    if (hsv_color.v > rgb_matrix_get_val()) {
+        hsv_color.v = rgb_matrix_get_val();
+    }
+    return hsv_to_rgb(hsv_color);
+}
+
+/**
  * Run code just after keyboard initialisation
  */
 void keyboard_post_init_user(void) {
     // Sync initial numlock state from the host
     if (host_keyboard_led_state().num_lock) {
-        rgb_states[4] = (RGB){255,255,255};
+        rgb_states[4] = hsv_to_rgb_val_lim(0,0,255);
     } else {
         rgb_states[4] = (RGB){0,0,0};
     }
@@ -157,7 +168,7 @@ bool led_update_user(led_t led_state) {
     // Change RGB state if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
     if (led_state.num_lock) {
-        rgb_states[4] = (RGB){255,255,255};
+        rgb_states[4] = hsv_to_rgb_val_lim(0,0,255);
     } else {
         rgb_states[4] = (RGB){0,0,0};
     }
@@ -173,19 +184,19 @@ layer_state_t layer_state_set_user(layer_state_t state) {
             rgb_states[5] = (RGB){0,0,0};
             break;
         case _MACRO0:
-            rgb_states[5] = (RGB){255,0,0};
+            rgb_states[5] = hsv_to_rgb_val_lim(0,255,255);
             break;
         case _MACRO1:
-            rgb_states[5] = (RGB){0,255,0};
+            rgb_states[5] = hsv_to_rgb_val_lim(85,255,255);
             break;
         case _MONITOR:
-            rgb_states[5] = (RGB){0,0,255};
+            rgb_states[5] = hsv_to_rgb_val_lim(171,255,255);
             break;
         case _APPLICATION:
-            rgb_states[5] = (RGB){255,0,255};
+            rgb_states[5] = hsv_to_rgb_val_lim(213,255,255);
             break;
         default:
-            rgb_states[5] = (RGB){255,255,255};
+            rgb_states[5] = hsv_to_rgb_val_lim(0,0,255);
             break;
     }
   return state;
