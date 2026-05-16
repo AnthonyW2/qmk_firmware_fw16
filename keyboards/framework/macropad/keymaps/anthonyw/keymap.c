@@ -139,21 +139,18 @@ typedef struct {
 static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT];
 
 bool led_update_user(led_t led_state) {
-    // Change layer if numlock state changes, either triggered by OS or
+    // Change RGB state if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
-    //if (led_state.num_lock) {
-    //    layer_off(_MACRO0);
-    //} else {
-    //    layer_on(_MACRO0);
-    //}
+    if (led_state.num_lock) {
+        rgb_states[4].r = 255;
+        rgb_states[4].g = 255;
+        rgb_states[4].b = 255;
+    } else {
+        rgb_states[4].r = 0;
+        rgb_states[4].g = 0;
+        rgb_states[4].b = 0;
+    }
     return true;
-}
-
-void enable_factory_mode(bool enable) {
-    if (enable)
-        layer_on(_FACTORY);
-    else
-        layer_off(_FACTORY);
 }
 
 /**
@@ -227,4 +224,11 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     return false;
+}
+
+void enable_factory_mode(bool enable) {
+    if (enable)
+        layer_on(_FACTORY);
+    else
+        layer_off(_FACTORY);
 }
