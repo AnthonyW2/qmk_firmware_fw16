@@ -137,6 +137,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 static RGB rgb_states[RGB_MATRIX_LED_COUNT];
 
 /**
+ * A number by which every RGB component is divided by
+ */
+uint8_t rgb_brightness_divisor = 1;
+
+/**
  * Run code just after keyboard initialisation
  */
 void keyboard_post_init_user(void) {
@@ -233,7 +238,11 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             break;
         case 2:
             // Set brightness
-            response[1] = 'C';
+            if (command_data[0] > 0) {
+                rgb_brightness_divisor = command_data[0];
+            }
+            response[1] = 2;
+            response[2] = 255 / rgb_brightness_divisor;
             break;
         default:
             response[1] = 'Z';
@@ -250,9 +259,9 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     for (uint8_t i = led_min; i < led_max; i++) {
         rgb_matrix_set_color(
             i,
-            rgb_states[i].r,
-            rgb_states[i].g,
-            rgb_states[i].b
+            rgb_states[i].r / rgb_brightness_divisor,
+            rgb_states[i].g / rgb_brightness_divisor,
+            rgb_states[i].b / rgb_brightness_divisor
         );
     }
 
