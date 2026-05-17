@@ -6,6 +6,7 @@
 #include "matrix.h"
 #include "factory.h"
 #include "framework.h"
+#include "custom.h"
 #if defined(RGB_MATRIX_ENABLE)
 #include "rgb_matrix.h"
 #endif
@@ -84,11 +85,6 @@ __attribute__ ((weak))
 void enable_factory_mode(bool enable) {
 }
 
-// Define custom HID handler function, overidden by user-defined code (see macropad/keymap.c)
-__attribute__ ((weak))
-void handle_custom_hid(uint8_t *data, uint8_t length) {
-}
-
 bool handle_hid(uint8_t *data, uint8_t length) {
     uint8_t command_id = data[0];
     uint8_t *command_data = &(data[1]);
@@ -110,7 +106,7 @@ bool handle_hid(uint8_t *data, uint8_t length) {
             // Don't let VIA handle it
             return true;
             
-        case 0xFF:
+        case CUSTOM_HID_PREFIX:
             // Take over the custom/unhandled command ID from via and use it for custom communication
             handle_custom_hid(command_data, length);
             // Don't let VIA handle it

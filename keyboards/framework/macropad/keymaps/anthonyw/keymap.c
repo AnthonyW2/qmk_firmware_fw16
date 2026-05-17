@@ -1,9 +1,12 @@
-// Copyright 2022 Framework Computer
+// Copyright 2026 Anthony Wilson
+
+// Original Macropad firmware by Framework Computer (Copyright 2022)
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include QMK_KEYBOARD_H
 #include "factory.h"
 #include "raw_hid.h"
+#include "custom.h"
 #if defined(RGB_MATRIX_ENABLE)
 #include "rgb_matrix.h"
 #endif
@@ -198,7 +201,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     // Send a RAW HID message to update the daemon
     uint8_t message[RAW_EPSIZE];
     memset(message, 0, RAW_EPSIZE);
-    message[0] = 0xFF;
+    message[0] = CUSTOM_HID_PREFIX;
     if (get_highest_layer(state) < 0xFF) {
         message[1] = get_highest_layer(state);
     } else {
@@ -221,8 +224,8 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
     uint8_t response[length];
     memset(response, 0, length);
     
-    // Our custom communication namespace is 0xFF
-    response[0] = 0xFF;
+    // Our custom communication namespace is CUSTOM_RAW_HID_PREFIX
+    response[0] = CUSTOM_HID_PREFIX;
     
     // Start by identifying the type of command received
     switch(command_id) {
