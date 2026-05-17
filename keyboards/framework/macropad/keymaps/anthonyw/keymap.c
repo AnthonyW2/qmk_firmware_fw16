@@ -156,9 +156,9 @@ void keyboard_post_init_user(void) {
     
     // Sync initial numlock state from the host
     if (host_keyboard_led_state().num_lock) {
-        rgb_states[4] = (RGB){255,255,255};
-    } else {
         rgb_states[4] = (RGB){0,0,0};
+    } else {
+        rgb_states[4] = (RGB){255,255,255};
     }
     
     // [future] Wait for a connection to the daemon, which will sync audio, layer, and LED state
@@ -171,9 +171,9 @@ bool led_update_user(led_t led_state) {
     // Change RGB state if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
     if (led_state.num_lock) {
-        rgb_states[4] = (RGB){255,255,255};
-    } else {
         rgb_states[4] = (RGB){0,0,0};
+    } else {
+        rgb_states[4] = (RGB){255,255,255};
     }
     return true;
 }
