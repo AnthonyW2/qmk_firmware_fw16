@@ -26,7 +26,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      *         ├────┼────┼────┼────┤
      *  3 keys │ 0  │ 0  │ .  │Entr│
      *         └────┴────┴────┴────┘
-     * 21 total
      */
     [_NUMPAD] = LAYOUT(
         TO(_MACRO0), KC_NO,   KC_MUTE, G(KC_MUTE),
@@ -65,7 +64,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS
     ),
     
-    // Just send key codes, and let the daemon and applications deal with them
+    /* Just send key codes, and let the daemon and applications deal with them
+     *         ┌────┬────┬────┬────┐
+     *  4 keys │ L++|    │MUTE│MICM│
+     *         ├────┼────┼────┼────┤
+     *  4 keys │SF17│SF18│SF19│SF20│
+     *         ├────┼────┼────┼────┤
+     *  3 keys │SF21│SF22│SF23│SF24│
+     *         ├────┼────┼────┼────┤
+     *  4 keys │ F13│ F14│ F15│ F16│
+     *         ├────┼────┼────┼────┤
+     *  4 keys │ F17│ F18│ F19│ F20│
+     *         ├────┼────┼────┼────┤
+     *  3 keys │ F21│ F22│ F23│ F24│
+     *         └────┴────┴────┴────┘
+     */
     [_APPLICATION] = LAYOUT(
         TO(_NUMPAD), KC_TRNS,   KC_TRNS,   KC_TRNS,
         S(KC_F17),   S(KC_F18), S(KC_F19), S(KC_F20),
@@ -89,7 +102,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      *         ├────┼────┼────┼────┤
      *  4 keys │ U  │ V  │ W  │ X  │
      *         └────┴────┴────┴────┘
-     * 24 total
      */
     [_FACTORY] = LAYOUT(
         KC_A,    KC_B,    KC_C,    KC_D,
@@ -99,38 +111,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_Q,    KC_R,    KC_S,    KC_T,
         KC_U,    KC_V,    KC_W,    KC_X
     ),
-    
-    
-     /*
-     *         ┌───────┬───────┬───────┬───────┐
-     *  4 keys │ RGB   │ RGB + │ RGB + │ RGB + │
-     *         │Toggle │ Speed │ Hue   │ Sat   │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys │Numlock│ RGB - │ RGB - │ RGB - │
-     *         |       │ Speed │ Hue   │ Sat   │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys │ Home  |   ↑   | Page  |RGB Nxt│
-     *         |       |       | Up    |Effect │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys |  ←    |       |   →   |RGB Prv│
-     *         |       |       |       |Effect │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys | End   |  ↓    | Page  │ BL    │
-     *         |       |       | Down  │ Step  │
-     *         ├───────┼───────┼───────┼───────┤
-     *  4 keys | Insert| Insert| Delete│ BL    │
-     *         |       |       |       │ Step  │
-     *         └───────┴───────┴───────┴───────┘
-     * 24 total
-     */
-    //[_FN] = LAYOUT(
-    //    RGB_TOG, RGB_SPI, RGB_HUI, RGB_SAI,
-    //    _______, RGB_SPD, RGB_HUD, RGB_SAD,
-    //    _______, _______, _______, RGB_MOD,
-    //    _______, _______, _______, RGB_RMOD,
-    //    _______, _______, _______, BL_STEP,
-    //    _______, _______, _______, BL_STEP
-    //),
     
 };
 
