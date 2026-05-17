@@ -115,6 +115,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 /**
+ * Define the codes for the custom RAW HID commands
+ */
+enum custom_hid_commands {
+    // Send/receive a ping
+    hid_cmd_ping       = 0x00,
+    // Acknowledge a ping
+    hid_cmd_ack        = 0x01,
+    
+    // Send/receive new layer
+    hid_cmd_set_layer  = 0x02, // [layer]
+    
+    // Receive a new RGB value for a key
+    hid_cmd_set_rgb    = 0x03, // [key id, r, g, b]
+    // Receive a new overall brightness level
+    hid_cmd_set_bright = 0x04, // [brightness divisor]
+    
+    // Send a key downpress event
+    hid_cmd_key_down   = 0x05, // [key id]
+    // Send a key release event
+    hid_cmd_key_up     = 0x06, // [key id]
+};
+
+/**
  * Store the state of all RGB LEDs
  */
 static RGB rgb_states[RGB_MATRIX_LED_COUNT];
@@ -156,8 +179,10 @@ bool led_update_user(led_t led_state) {
  * Run code on layer change
  */
 layer_state_t layer_state_set_user(layer_state_t state) {
+    uint8_t new_layer = get_highest_layer(state);
+    
     // Update RGB state according to the new layer
-    switch (get_highest_layer(state)) {
+    switch (new_layer) {
         case _NUMPAD:
             rgb_states[5] = (RGB){0,0,0};
             break;
@@ -182,11 +207,8 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     uint8_t message[RAW_EPSIZE];
     memset(message, 0, RAW_EPSIZE);
     message[0] = CUSTOM_HID_PREFIX;
-    if (get_highest_layer(state) < 0xFF) {
-        message[1] = get_highest_layer(state);
-    } else {
-        message[1] = 0xFF;
-    }
+    message[1] = hid_cmd_set_layer;
+    message[2] = new_layer;
     raw_hid_send(message, RAW_EPSIZE);
     
     return state;
@@ -209,15 +231,21 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
     
     // Start by identifying the type of command received
     switch(command_id) {
-        case 0:
+        case hid_cmd_ping:
+            // Respond to ping
+            response[1] = hid_cmd_ack;
+            break;
+        
+        case hid_cmd_set_layer:
             // Set layer
             if (command_data[0] >= _NUMPAD && command_data[0] <= _APPLICATION) {
                 layer_move(command_data[0]);
             }
-            response[1] = 0;
+            response[1] = hid_cmd_set_layer;
             response[2] = command_data[0];
             break;
-        case 1:
+        
+        case hid_cmd_set_rgb:
             // Set RGB LED
             uint8_t index = command_data[0];
             
@@ -227,19 +255,21 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             
             rgb_states[index] = (RGB){command_data[1], command_data[2], command_data[3]};
             
-            response[1] = 1;
+            response[1] = hid_cmd_set_rgb;
             response[2] = rgb_states[index].r;
             response[3] = rgb_states[index].g;
             response[4] = rgb_states[index].b;
             break;
-        case 2:
+        
+        case hid_cmd_set_bright:
             // Set brightness
             if (command_data[0] > 0) {
                 rgb_brightness_divisor = command_data[0];
             }
-            response[1] = 2;
+            response[1] = hid_cmd_set_bright;
             response[2] = 255 / rgb_brightness_divisor;
             break;
+        
         default:
             // Not a known command
             response[1] = 0xFF;
