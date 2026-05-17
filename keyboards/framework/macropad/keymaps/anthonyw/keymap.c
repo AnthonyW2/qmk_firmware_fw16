@@ -242,9 +242,10 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             if (command_data[0] >= _NUMPAD && command_data[0] <= _APPLICATION) {
                 layer_move(command_data[0]);
             }
-            response[1] = hid_cmd_set_layer;
-            response[2] = command_data[0];
-            break;
+            //response[1] = hid_cmd_set_layer;
+            //response[2] = command_data[0];
+            return;
+            //break;
         
         case hid_cmd_set_rgb:
             // Set RGB LED
