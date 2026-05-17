@@ -140,7 +140,7 @@ enum custom_hid_commands {
 /**
  * Store the state of all RGB LEDs
  */
-static RGB rgb_states[RGB_MATRIX_LED_COUNT];
+static RGB rgb_states[RGB_MATRIX_LED_COUNT] = {0};
 
 /**
  * A number by which every RGB component is divided by
@@ -204,8 +204,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     }
     
     // Send a RAW HID message to update the daemon
-    uint8_t message[RAW_EPSIZE];
-    memset(message, 0, RAW_EPSIZE);
+    uint8_t message[RAW_EPSIZE] = {0};
     message[0] = CUSTOM_HID_PREFIX;
     message[1] = hid_cmd_set_layer;
     message[2] = new_layer;
@@ -223,8 +222,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
     uint8_t command_id = data[0];
     uint8_t *command_data = &(data[1]);
     
-    uint8_t response[length];
-    memset(response, 0, length);
+    uint8_t response[RAW_EPSIZE] = {0};
     
     // Our custom communication namespace is CUSTOM_RAW_HID_PREFIX
     response[0] = CUSTOM_HID_PREFIX;
@@ -275,7 +273,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             response[1] = 0xFF;
     }
     
-    raw_hid_send(response, length);
+    raw_hid_send(response, RAW_EPSIZE);
 }
 
 /**
