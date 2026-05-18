@@ -140,9 +140,17 @@ enum custom_hid_commands {
 };
 
 /**
+ * Create our own rgb_state_t struct, because this version of QMK doesn't have rgb_t,
+ * and the byte order of the RGB struct isn't necessarily red-green-blue.
+ */
+typedef struct {
+    uint8_t r, g, b;
+} rgb_state_t;
+
+/**
  * Store the state of all RGB LEDs
  */
-static RGB rgb_states[RGB_MATRIX_LED_COUNT] = {0};
+static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT] = {0};
 
 /**
  * A number by which every RGB component is divided by
@@ -179,13 +187,13 @@ void keyboard_post_init_user(void) {
     
     // Sync initial numlock state from the host
     if (host_keyboard_led_state().num_lock) {
-        rgb_states[4] = (RGB){0,0,0};
+        rgb_states[4] = (rgb_state_t){0,0,0};
     } else {
-        rgb_states[4] = (RGB){255,255,255};
+        rgb_states[4] = (rgb_state_t){255,255,255};
     }
     
     // Set the color of the top second-left RGB LED to red, indicating that the daemon has not established connection yet
-    rgb_states[2] = (RGB){255,0,0};
+    rgb_states[2] = (rgb_state_t){255,0,0};
     
     // Tell the daemon that the macropad is available
     uint8_t message[RAW_EPSIZE] = {0};
@@ -201,9 +209,9 @@ bool led_update_user(led_t led_state) {
     // Change RGB state if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
     if (led_state.num_lock) {
-        rgb_states[4] = (RGB){0,0,0};
+        rgb_states[4] = (rgb_state_t){0,0,0};
     } else {
-        rgb_states[4] = (RGB){255,255,255};
+        rgb_states[4] = (rgb_state_t){255,255,255};
     }
     return true;
 }
@@ -218,22 +226,22 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     // Update RGB state according to the new layer
     switch (current_layer) {
         case _NUMPAD:
-            rgb_states[5] = (RGB){0,0,0};
+            rgb_states[5] = (rgb_state_t){0,0,0};
             break;
         case _MACRO0:
-            rgb_states[5] = (RGB){255,0,0};
+            rgb_states[5] = (rgb_state_t){255,0,0};
             break;
         case _MACRO1:
-            rgb_states[5] = (RGB){0,255,0};
+            rgb_states[5] = (rgb_state_t){0,255,0};
             break;
         case _MONITOR:
-            rgb_states[5] = (RGB){0,0,255};
+            rgb_states[5] = (rgb_state_t){0,0,255};
             break;
         case _APPLICATION:
-            rgb_states[5] = (RGB){255,0,255};
+            rgb_states[5] = (rgb_state_t){255,0,255};
             break;
         default:
-            rgb_states[5] = (RGB){255,255,255};
+            rgb_states[5] = (rgb_state_t){255,255,255};
             break;
     }
     
@@ -260,7 +268,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             // Ping received, daemon must be available
             daemon_hid_initialised = true;
             daemon_hid_available = true;
-            rgb_states[2] = (RGB){0,0,0};
+            rgb_states[2] = (rgb_state_t){0,0,0};
             // Acknowledge the ping
             response[1] = hid_cmd_ack;
             break;
@@ -269,7 +277,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             // Ping acknowledged, daemon must be available
             daemon_hid_initialised = true;
             daemon_hid_available = true;
-            rgb_states[2] = (RGB){0,0,0};
+            rgb_states[2] = (rgb_state_t){0,0,0};
             return;
             //break;
         
@@ -291,7 +299,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
                 return;
             }
             
-            rgb_states[index] = (RGB){command_data[1], command_data[2], command_data[3]};
+            rgb_states[index] = (rgb_state_t){command_data[1], command_data[2], command_data[3]};
             
             response[1] = hid_cmd_set_rgb;
             response[2] = rgb_states[index].r;
