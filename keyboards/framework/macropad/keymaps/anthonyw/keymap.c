@@ -230,23 +230,25 @@ void keyboard_post_init_user(void) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KC_STATUS_REQ:
-            if (showing_daemon_status) {
-                // Reset status LEDs
-                rgb_states[system_stat_led_ids[0]] = (rgb_state_t){0, 0, 0};
-                rgb_states[system_stat_led_ids[1]] = (rgb_state_t){0, 0, 0};
-                rgb_states[system_stat_led_ids[2]] = (rgb_state_t){0, 0, 0};
-                rgb_states[system_stat_led_ids[3]] = (rgb_state_t){0, 0, 0};
-                set_numlock_led(host_keyboard_led_state().num_lock);
-                showing_daemon_status = false;
-            } else {
-                // Send a status request to the daemon on the host
-                pending_daemon_status_req = true;
-                // Show all red status LEDs while awaiting response
-                rgb_states[system_stat_led_ids[0]] = (rgb_state_t){255, 0, 0};
-                rgb_states[system_stat_led_ids[1]] = (rgb_state_t){255, 0, 0};
-                rgb_states[system_stat_led_ids[2]] = (rgb_state_t){255, 0, 0};
-                rgb_states[system_stat_led_ids[3]] = (rgb_state_t){255, 0, 0};
-                showing_daemon_status = true;
+            if (record->event.pressed) {
+                if (showing_daemon_status) {
+                    // Reset status LEDs
+                    rgb_states[system_stat_led_ids[0]] = (rgb_state_t){0, 0, 0};
+                    rgb_states[system_stat_led_ids[1]] = (rgb_state_t){0, 0, 0};
+                    rgb_states[system_stat_led_ids[2]] = (rgb_state_t){0, 0, 0};
+                    rgb_states[system_stat_led_ids[3]] = (rgb_state_t){0, 0, 0};
+                    set_numlock_led(host_keyboard_led_state().num_lock);
+                    showing_daemon_status = false;
+                } else {
+                    // Send a status request to the daemon on the host
+                    pending_daemon_status_req = true;
+                    // Show all red status LEDs while awaiting response
+                    rgb_states[system_stat_led_ids[0]] = (rgb_state_t){255, 0, 0};
+                    rgb_states[system_stat_led_ids[1]] = (rgb_state_t){255, 0, 0};
+                    rgb_states[system_stat_led_ids[2]] = (rgb_state_t){255, 0, 0};
+                    rgb_states[system_stat_led_ids[3]] = (rgb_state_t){255, 0, 0};
+                    showing_daemon_status = true;
+                }
             }
             return false;
         
