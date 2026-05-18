@@ -10,6 +10,7 @@
 #if defined(RGB_MATRIX_ENABLE)
 #include "rgb_matrix.h"
 #endif
+#include "keymap.h"
 
 // Define custom keycodes
 enum keycodes {
@@ -211,11 +212,7 @@ void keyboard_post_init_user(void) {
     rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
     
     // Sync initial numlock state from the host
-    if (host_keyboard_led_state().num_lock) {
-        rgb_states[4] = (rgb_state_t){0,0,0};
-    } else {
-        rgb_states[4] = (rgb_state_t){255,255,255};
-    }
+    set_numlock_led(host_keyboard_led_state().num_lock);
     
     // Set the color of the top second-left RGB LED to red, indicating that the daemon has not established connection yet
     rgb_states[2] = (rgb_state_t){255,0,0};
@@ -239,11 +236,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 rgb_states[system_stat_led_ids[1]] = (rgb_state_t){0, 0, 0};
                 rgb_states[system_stat_led_ids[2]] = (rgb_state_t){0, 0, 0};
                 rgb_states[system_stat_led_ids[3]] = (rgb_state_t){0, 0, 0};
-                if (host_keyboard_led_state().num_lock) {
-                    rgb_states[4] = (rgb_state_t){0,0,0};
-                } else {
-                    rgb_states[4] = (rgb_state_t){255,255,255};
-                }
+                set_numlock_led(host_keyboard_led_state().num_lock);
                 showing_daemon_status = false;
             } else {
                 // Send a status request to the daemon on the host
@@ -269,11 +262,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 bool led_update_user(led_t led_state) {
     // Change RGB state if numlock state changes, either triggered by OS or
     // by numlock key on this keyboard
-    if (led_state.num_lock) {
-        rgb_states[4] = (rgb_state_t){0,0,0};
-    } else {
-        rgb_states[4] = (rgb_state_t){255,255,255};
-    }
+    set_numlock_led(led_state.num_lock);
     return true;
 }
 
@@ -474,6 +463,17 @@ void housekeeping_task_user(void) {
         raw_hid_send(message, RAW_EPSIZE);
         
         pending_layer_update = false;
+    }
+}
+
+/**
+ * Update the state of the numlock LED
+ */
+void set_numlock_led(bool numlock_state) {
+    if (numlock_state) {
+        rgb_states[4] = (rgb_state_t){0,0,0};
+    } else {
+        rgb_states[4] = (rgb_state_t){255,255,255};
     }
 }
 
