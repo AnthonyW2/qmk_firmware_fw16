@@ -361,7 +361,11 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
         
         case hid_cmd_set_bright:
             // Set brightness
-            rgb_brightness_shift = command_data[0];
+            if (command_data[0] < 8) {
+                rgb_brightness_shift = command_data[0];
+            } else {
+                rgb_brightness_shift = 7;
+            }
             response[1] = hid_cmd_set_bright;
             response[2] = 255 >> rgb_brightness_shift;
             break;
