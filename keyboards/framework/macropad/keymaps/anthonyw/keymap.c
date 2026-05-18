@@ -151,6 +151,18 @@ static RGB rgb_states[RGB_MATRIX_LED_COUNT] = {0};
 uint8_t rgb_brightness_divisor = 1;
 
 /**
+ * True if the daemon has ever been heard from since boot.
+ */
+static bool daemon_hid_initialised = false;
+/**
+ * True if the daemon is currently available.
+ * False if it hasn't been heard from in a while.
+ * 
+ * NOTE: Currently this is not automatically updated (no heartbeat pings).
+ */
+static bool daemon_hid_available = false;
+
+/**
  * Store the current layer (updated by layer_state_set_user).
  */
 static uint8_t current_layer = 0;
@@ -173,7 +185,11 @@ void keyboard_post_init_user(void) {
         rgb_states[4] = (RGB){255,255,255};
     }
     
-    // [future] Wait for a connection to the daemon, which will sync audio, layer, and LED state
+    // Tell the daemon that the macropad is available
+    uint8_t message[RAW_EPSIZE] = {0};
+    message[0] = CUSTOM_HID_PREFIX;
+    message[1] = hid_cmd_ping;
+    raw_hid_send(message, RAW_EPSIZE);
 }
 
 /**
@@ -239,9 +255,19 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
     // Start by identifying the type of command received
     switch(command_id) {
         case hid_cmd_ping:
-            // Respond to ping
+            // Ping received, daemon must be available
+            daemon_hid_initialised = true;
+            daemon_hid_available = true;
+            // Acknowledge the ping
             response[1] = hid_cmd_ack;
             break;
+        
+        case hid_cmd_ack:
+            // Ping acknowledged, daemon must be available
+            daemon_hid_initialised = true;
+            daemon_hid_available = true;
+            return;
+            //break;
         
         case hid_cmd_set_layer:
             // Set layer
@@ -344,7 +370,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
  * Clean up after QMK processing.
  */
 void housekeeping_task_user(void) {
-    if (pending_layer_update) {
+    if (pending_layer_update && daemon_hid_available) {
         // Send a RAW HID message to update the daemon about the new layer
         uint8_t message[RAW_EPSIZE] = {0};
         message[0] = CUSTOM_HID_PREFIX;
