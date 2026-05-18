@@ -151,6 +151,15 @@ static RGB rgb_states[RGB_MATRIX_LED_COUNT] = {0};
 uint8_t rgb_brightness_divisor = 1;
 
 /**
+ * Store the current layer (updated by layer_state_set_user).
+ */
+static uint8_t current_layer = 0;
+/**
+ * If this is true, then a RAW HID message needs to be sent to the daemon to inform it that the keyboard has switched layers.
+ */
+static bool pending_layer_update = false;
+
+/**
  * Run code just after keyboard initialisation
  */
 void keyboard_post_init_user(void) {
@@ -185,10 +194,11 @@ bool led_update_user(led_t led_state) {
  * Run code on layer change
  */
 layer_state_t layer_state_set_user(layer_state_t state) {
-    uint8_t new_layer = get_highest_layer(state);
+    current_layer = get_highest_layer(state);
+    pending_layer_update = true;
     
     // Update RGB state according to the new layer
-    switch (new_layer) {
+    switch (current_layer) {
         case _NUMPAD:
             rgb_states[5] = (RGB){0,0,0};
             break;
@@ -208,13 +218,6 @@ layer_state_t layer_state_set_user(layer_state_t state) {
             rgb_states[5] = (RGB){255,255,255};
             break;
     }
-    
-    // Send a RAW HID message to update the daemon
-    uint8_t message[RAW_EPSIZE] = {0};
-    message[0] = CUSTOM_HID_PREFIX;
-    message[1] = hid_cmd_set_layer;
-    message[2] = new_layer;
-    raw_hid_send(message, RAW_EPSIZE);
     
     return state;
 }
@@ -335,6 +338,22 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     return false;
+}
+
+/**
+ * Clean up after QMK processing.
+ */
+void housekeeping_task_user(void) {
+    if (pending_layer_update) {
+        // Send a RAW HID message to update the daemon about the new layer
+        uint8_t message[RAW_EPSIZE] = {0};
+        message[0] = CUSTOM_HID_PREFIX;
+        message[1] = hid_cmd_set_layer;
+        message[2] = current_layer;
+        raw_hid_send(message, RAW_EPSIZE);
+        
+        pending_layer_update = false;
+    }
 }
 
 /**
