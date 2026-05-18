@@ -137,6 +137,11 @@ enum custom_hid_commands {
     hid_cmd_key_down   = 0x06, // [key id]
     // Send a key release event
     hid_cmd_key_up     = 0x07, // [key id]
+    
+    // Ask the daemon for host system status
+    hid_cmd_status_req = 0x08,
+    // Receive host system status response
+    hid_cmd_status_res = 0x09, // [mem, cpu, gpu, gui, crashes, kernel]
 };
 
 /**
@@ -179,6 +184,11 @@ static uint8_t current_layer = 0;
  * If this is true, then a RAW HID message needs to be sent to the daemon to inform it that the keyboard has switched layers.
  */
 static bool pending_layer_update = false;
+
+/**
+ * Which RGB LEDs are used to indicate requested host system status
+ */
+const uint8_t system_stat_led_ids[4] = {4, 0, 20, 18};
 
 /**
  * Run code just after keyboard initialisation
@@ -351,6 +361,15 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             response[2] = rgb_matrix_is_enabled();
             response[3] = rgb_matrix_get_mode();
             response[4] = rgb_matrix_get_suspend_state();
+            break;
+        
+        case hid_cmd_status_res:
+            // Parse host system status response
+            // [mem, cpu, gpu, gui, crashes, kernel]
+            rgb_states[system_stat_led_ids[0]] = (rgb_state_t){command_data[0], command_data[1], command_data[2]};
+            rgb_states[system_stat_led_ids[1]] = (rgb_state_t){command_data[3], 0, 0};
+            rgb_states[system_stat_led_ids[2]] = (rgb_state_t){command_data[4], 0, 0};
+            rgb_states[system_stat_led_ids[3]] = (rgb_state_t){command_data[5], 0, 0};
             break;
         
         default:
