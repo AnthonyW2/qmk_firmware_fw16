@@ -130,14 +130,13 @@ enum custom_hid_commands {
     hid_cmd_set_rgb    = 0x03, // [key id, r, g, b]
     // Receive a new overall brightness level
     hid_cmd_set_bright = 0x04, // [brightness divisor]
+    // RGB matrix enable/disable & set mode
+    hid_cmd_rgb_matrix = 0x05, // [new state, new mode]
     
     // Send a key downpress event
-    hid_cmd_key_down   = 0x05, // [key id]
+    hid_cmd_key_down   = 0x06, // [key id]
     // Send a key release event
-    hid_cmd_key_up     = 0x06, // [key id]
-    
-    // RGB matrix enable/disable
-    hid_cmd_rgb_matrix = 0x07, // [new state, new mode]
+    hid_cmd_key_up     = 0x07, // [key id]
 };
 
 /**
