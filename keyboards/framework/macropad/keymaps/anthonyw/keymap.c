@@ -135,6 +135,9 @@ enum custom_hid_commands {
     hid_cmd_key_down   = 0x05, // [key id]
     // Send a key release event
     hid_cmd_key_up     = 0x06, // [key id]
+    
+    // RGB matrix enable/disable
+    hid_cmd_rgb_matrix = 0x07, // [new state, new mode]
 };
 
 /**
@@ -270,6 +273,43 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             }
             response[1] = hid_cmd_set_bright;
             response[2] = 255 / rgb_brightness_divisor;
+            break;
+        
+        case hid_cmd_rgb_matrix:
+            // Enable/disable RGB matrix
+            switch (command_data[0]) {
+                case 0:
+                    rgb_matrix_disable_noeeprom();
+                    break;
+                case 1:
+                    rgb_matrix_enable_noeeprom();
+                    break;
+                case 2:
+                    rgb_matrix_disable();
+                    break;
+                case 3:
+                    rgb_matrix_enable();
+                    break;
+            }
+            // Set RGB matrix mode
+            switch (command_data[1]) {
+                case 0:
+                    rgb_matrix_mode_noeeprom(0);
+                    break;
+                case 1:
+                    rgb_matrix_mode_noeeprom(1);
+                    break;
+                case 2:
+                    rgb_matrix_mode(0);
+                    break;
+                case 3:
+                    rgb_matrix_mode(1);
+                    break;
+            }
+            response[1] = hid_cmd_rgb_matrix;
+            response[2] = rgb_matrix_is_enabled();
+            response[3] = rgb_matrix_get_mode();
+            response[4] = rgb_matrix_get_suspend_state();
             break;
         
         default:
