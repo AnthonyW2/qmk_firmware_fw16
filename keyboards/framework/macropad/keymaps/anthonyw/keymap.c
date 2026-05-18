@@ -153,9 +153,11 @@ typedef struct {
 static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT] = {0};
 
 /**
- * A number by which every RGB component is divided by
+ * How many times to halve RGB components to reduce brightness.
+ * A value of 0 is full brightness, 1 is half, etc.
+ * 8 is completely off/dark/black.
  */
-uint8_t rgb_brightness_divisor = 1;
+static uint8_t rgb_brightness_shift = 0;
 
 /**
  * True if the daemon has ever been heard from since boot.
@@ -309,11 +311,9 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
         
         case hid_cmd_set_bright:
             // Set brightness
-            if (command_data[0] > 0) {
-                rgb_brightness_divisor = command_data[0];
-            }
+            rgb_brightness_shift = command_data[0];
             response[1] = hid_cmd_set_bright;
-            response[2] = 255 / rgb_brightness_divisor;
+            response[2] = 255 >> rgb_brightness_shift;
             break;
         
         case hid_cmd_rgb_matrix:
@@ -369,9 +369,9 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     for (uint8_t i = led_min; i < led_max; i++) {
         rgb_matrix_set_color(
             i,
-            rgb_states[i].r / rgb_brightness_divisor,
-            rgb_states[i].g / rgb_brightness_divisor,
-            rgb_states[i].b / rgb_brightness_divisor
+            rgb_states[i].r >> rgb_brightness_shift,
+            rgb_states[i].g >> rgb_brightness_shift,
+            rgb_states[i].b >> rgb_brightness_shift
         );
     }
 
