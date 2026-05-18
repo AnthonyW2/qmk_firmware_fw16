@@ -154,8 +154,8 @@ uint8_t rgb_brightness_divisor = 1;
  * Run code just after keyboard initialisation
  */
 void keyboard_post_init_user(void) {
-    rgb_matrix_enable();
-    rgb_matrix_mode(RGB_MATRIX_SOLID_COLOR);
+    rgb_matrix_enable_noeeprom();
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
     
     // Sync initial numlock state from the host
     if (host_keyboard_led_state().num_lock) {
