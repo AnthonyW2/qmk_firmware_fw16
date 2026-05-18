@@ -192,6 +192,13 @@ static uint8_t current_layer = 0;
 static bool pending_layer_update = false;
 
 /**
+ * Store current daemon status request, response, and display states
+ */
+static bool pending_daemon_status_req = false;
+static bool pending_daemon_status_res = false;
+static bool showing_daemon_status = false;
+
+/**
  * Which RGB LEDs are used to indicate requested host system status
  */
 const uint8_t system_stat_led_ids[4] = {4, 0, 20, 18};
@@ -218,6 +225,42 @@ void keyboard_post_init_user(void) {
     message[0] = CUSTOM_HID_PREFIX;
     message[1] = hid_cmd_ping;
     raw_hid_send(message, RAW_EPSIZE);
+}
+
+/**
+ * Handle custom keycode actions
+ */
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case KC_STATUS_REQ:
+            if (showing_daemon_status) {
+                // Reset status LEDs
+                rgb_states[system_stat_led_ids[0]] = (rgb_state_t){0, 0, 0};
+                rgb_states[system_stat_led_ids[1]] = (rgb_state_t){0, 0, 0};
+                rgb_states[system_stat_led_ids[2]] = (rgb_state_t){0, 0, 0};
+                rgb_states[system_stat_led_ids[3]] = (rgb_state_t){0, 0, 0};
+                if (host_keyboard_led_state().num_lock) {
+                    rgb_states[4] = (rgb_state_t){0,0,0};
+                } else {
+                    rgb_states[4] = (rgb_state_t){255,255,255};
+                }
+                showing_daemon_status = false;
+            } else {
+                // Send a status request to the daemon on the host
+                pending_daemon_status_req = true;
+                // Show all red status LEDs while awaiting response
+                rgb_states[system_stat_led_ids[0]] = (rgb_state_t){255, 0, 0};
+                rgb_states[system_stat_led_ids[1]] = (rgb_state_t){255, 0, 0};
+                rgb_states[system_stat_led_ids[2]] = (rgb_state_t){255, 0, 0};
+                rgb_states[system_stat_led_ids[3]] = (rgb_state_t){255, 0, 0};
+                showing_daemon_status = true;
+            }
+            return false;
+        
+        default:
+            // Process other keycodes normally
+            return true;
+    }
 }
 
 /**
@@ -376,6 +419,8 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             rgb_states[system_stat_led_ids[1]] = (rgb_state_t){command_data[3], 0, 0};
             rgb_states[system_stat_led_ids[2]] = (rgb_state_t){command_data[4], 0, 0};
             rgb_states[system_stat_led_ids[3]] = (rgb_state_t){command_data[5], 0, 0};
+            showing_daemon_status = true;
+            pending_daemon_status_res = false;
             break;
         
         default:
@@ -407,6 +452,19 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
  * Clean up after QMK processing.
  */
 void housekeeping_task_user(void) {
+    if (pending_daemon_status_req) {
+        // Send a RAW HID message to ask the daemon for its status
+        uint8_t message[RAW_EPSIZE] = {0};
+        message[0] = CUSTOM_HID_PREFIX;
+        message[1] = hid_cmd_status_req;
+        raw_hid_send(message, RAW_EPSIZE);
+        
+        pending_daemon_status_req = false;
+        
+        // Now awaiting response
+        pending_daemon_status_res = true;
+    }
+    
     if (pending_layer_update && daemon_hid_available) {
         // Send a RAW HID message to update the daemon about the new layer
         uint8_t message[RAW_EPSIZE] = {0};
