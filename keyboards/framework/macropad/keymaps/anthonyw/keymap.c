@@ -231,6 +231,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KC_STATUS_REQ:
             if (record->event.pressed) {
+                // Enable the RGB LEDs if they were disabled
+                rgb_matrix_enable_noeeprom();
                 if (showing_daemon_status) {
                     // Reset status LEDs
                     rgb_states[system_stat_led_ids[0]] = (rgb_state_t){0, 0, 0};
