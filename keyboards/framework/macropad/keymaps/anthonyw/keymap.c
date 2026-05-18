@@ -11,6 +11,12 @@
 #include "rgb_matrix.h"
 #endif
 
+// Define custom keycodes
+enum keycodes {
+    // Ask the system for its status
+    KC_STATUS_REQ = QK_USER,
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Just a numpad (except for the top row)
      *         ┌────┬────┬────┬────┐
@@ -28,12 +34,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      *         └────┴────┴────┴────┘
      */
     [_NUMPAD] = LAYOUT(
-        TO(_MACRO0), KC_NO,   KC_MUTE, G(KC_MUTE),
-        KC_NUM,      KC_PSLS, KC_PAST, KC_PMNS,
-        KC_P7,       KC_P8,   KC_P9,   KC_PPLS,
-        KC_P4,       KC_P5,   KC_P6,   KC_PPLS,
-        KC_P1,       KC_P2,   KC_P3,   KC_PENT,
-        KC_P0,       KC_P0,   KC_PDOT, KC_PENT
+        TO(_MACRO0), KC_STATUS_REQ, KC_MUTE, G(KC_MUTE),
+        KC_NUM,      KC_PSLS,       KC_PAST, KC_PMNS,
+        KC_P7,       KC_P8,         KC_P9,   KC_PPLS,
+        KC_P4,       KC_P5,         KC_P6,   KC_PPLS,
+        KC_P1,       KC_P2,         KC_P3,   KC_PENT,
+        KC_P0,       KC_P0,         KC_PDOT, KC_PENT
     ),
     
     // My custom quick-access & navigation layouts
