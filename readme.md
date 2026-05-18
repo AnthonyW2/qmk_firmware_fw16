@@ -1,10 +1,22 @@
 # Anthony's Custom Framework 16 RGB Macropad
 
-This repository defines the QMK firmware running on my Framework 16's RGB macropad.
+This is the customised QMK firmware running on my Framework 16's RGB macropad.
 
-List of modifications will be updated in the future.
+Compared to Framework's fork, I have made the following changes:
+- Custom keymap with cyclic layers.
+- RAW HID communication with a daemon running on the OS.
+- Individual RGB control on every key.
+- Global brightness control.
+- Numpad indicator.
+- System state & load reporting.
 
-The source code for the daemon running on the OS will be uploaded to a separate repository in the future.
+My modifications should retain interoperability with all of Framework's functionality (including factory RAW HID commands and VIA communication)
+and be compatible with the default keymap, however all built-in RGB effects are disabled for the macropad.
+
+I also developed this firmware with power efficiency in mind, and kept the firmware size small.
+
+The source code for the daemon running on the OS can be found at [AnthonyW2/macropad_daemon](https://github.com/AnthonyW2/macropad_daemon).
+
 
 # Quantum Mechanical Keyboard Firmware
 
