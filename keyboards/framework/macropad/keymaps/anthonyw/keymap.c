@@ -185,6 +185,9 @@ void keyboard_post_init_user(void) {
         rgb_states[4] = (RGB){255,255,255};
     }
     
+    // Set the color of the top second-left RGB LED to red, indicating that the daemon has not established connection yet
+    rgb_states[2] = (RGB){255,0,0};
+    
     // Tell the daemon that the macropad is available
     uint8_t message[RAW_EPSIZE] = {0};
     message[0] = CUSTOM_HID_PREFIX;
@@ -258,6 +261,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             // Ping received, daemon must be available
             daemon_hid_initialised = true;
             daemon_hid_available = true;
+            rgb_states[2] = (RGB){0,0,0};
             // Acknowledge the ping
             response[1] = hid_cmd_ack;
             break;
@@ -266,6 +270,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             // Ping acknowledged, daemon must be available
             daemon_hid_initialised = true;
             daemon_hid_available = true;
+            rgb_states[2] = (RGB){0,0,0};
             return;
             //break;
         
