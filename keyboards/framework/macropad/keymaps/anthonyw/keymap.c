@@ -167,9 +167,9 @@ static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT] = {0};
 /**
  * How many times to halve RGB components to reduce brightness.
  * A value of 0 is full brightness, 1 is half, etc.
- * 8 is completely off/dark/black.
+ * 7 is the lowest brightness, reducing 0xFF to 0x01.
  */
-static uint8_t rgb_brightness_shift = 0;
+static uint8_t rgb_brightness_shift = 3;
 
 /**
  * True if the daemon has ever been heard from since boot.
