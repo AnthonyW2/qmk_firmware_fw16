@@ -78,5 +78,5 @@
 #define RGB_MATRIX_DEFAULT_ON true
 // Update at most 4 LEDs at a time (per task run)
 #define RGB_MATRIX_LED_PROCESS_LIMIT 4
-// Limit RGB matrix refresh rate to 50 Hz
-#define RGB_MATRIX_LED_FLUSH_LIMIT 20
+// Limit RGB matrix refresh rate to 25Hz
+#define RGB_MATRIX_LED_FLUSH_LIMIT 40
