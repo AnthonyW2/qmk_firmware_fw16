@@ -333,7 +333,6 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             daemon_hid_available = true;
             rgb_states[2] = (rgb_state_t){0,0,0};
             return;
-            //break;
         
         case hid_cmd_set_layer:
             // Set layer
@@ -343,23 +342,17 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             //response[1] = hid_cmd_set_layer;
             //response[2] = command_data[0];
             return;
-            //break;
         
         case hid_cmd_set_rgb:
             // Set RGB LED
-            uint8_t index = command_data[0];
-            
-            if (index >= RGB_MATRIX_LED_COUNT) {
-                return;
+            if (command_data[0] < RGB_MATRIX_LED_COUNT) {
+                rgb_states[command_data[0]] = (rgb_state_t){command_data[1], command_data[2], command_data[3]};
             }
-            
-            rgb_states[index] = (rgb_state_t){command_data[1], command_data[2], command_data[3]};
-            
-            response[1] = hid_cmd_set_rgb;
-            response[2] = rgb_states[index].r;
-            response[3] = rgb_states[index].g;
-            response[4] = rgb_states[index].b;
-            break;
+            //response[1] = hid_cmd_set_rgb;
+            //response[2] = rgb_states[index].r;
+            //response[3] = rgb_states[index].g;
+            //response[4] = rgb_states[index].b;
+            return;
         
         case hid_cmd_set_bright:
             // Set brightness
@@ -368,9 +361,9 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             } else {
                 rgb_brightness_shift = 7;
             }
-            response[1] = hid_cmd_set_bright;
-            response[2] = 255 >> rgb_brightness_shift;
-            break;
+            //response[1] = hid_cmd_set_bright;
+            //response[2] = 255 >> rgb_brightness_shift;
+            return;
         
         case hid_cmd_rgb_matrix:
             // Enable/disable RGB matrix
@@ -403,11 +396,11 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
                     rgb_matrix_mode(1);
                     break;
             }
-            response[1] = hid_cmd_rgb_matrix;
-            response[2] = rgb_matrix_is_enabled();
-            response[3] = rgb_matrix_get_mode();
-            response[4] = rgb_matrix_get_suspend_state();
-            break;
+            //response[1] = hid_cmd_rgb_matrix;
+            //response[2] = rgb_matrix_is_enabled();
+            //response[3] = rgb_matrix_get_mode();
+            //response[4] = rgb_matrix_get_suspend_state();
+            return;
         
         case hid_cmd_status_res:
             // Parse host system status response
@@ -418,7 +411,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
             rgb_states[system_stat_led_ids[3]] = (rgb_state_t){command_data[5], 0, 0};
             showing_daemon_status = true;
             pending_daemon_status_res = false;
-            break;
+            return;
         
         default:
             // Not a known command
