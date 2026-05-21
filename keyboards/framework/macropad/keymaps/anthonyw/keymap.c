@@ -290,22 +290,22 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     // Update RGB state according to the new layer
     switch (current_layer) {
         case _NUMPAD:
-            rgb_states[5] = (rgb_state_t){0,0,0};
+            rgb_states[5] = (rgb_state_t){127,63,63};
             break;
         case _MACRO0:
-            rgb_states[5] = (rgb_state_t){255,0,0};
+            rgb_states[5] = (rgb_state_t){0,0,0};
             break;
         case _MACRO1:
-            rgb_states[5] = (rgb_state_t){0,255,0};
+            rgb_states[5] = (rgb_state_t){63,127,63};
             break;
         case _MONITOR:
-            rgb_states[5] = (rgb_state_t){0,0,255};
+            rgb_states[5] = (rgb_state_t){63,63,127};
             break;
         case _APPLICATION:
-            rgb_states[5] = (rgb_state_t){255,0,255};
+            rgb_states[5] = (rgb_state_t){127,63,127};
             break;
         default:
-            rgb_states[5] = (rgb_state_t){255,255,255};
+            rgb_states[5] = (rgb_state_t){127,127,127};
             break;
     }
     
