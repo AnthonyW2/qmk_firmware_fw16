@@ -186,7 +186,7 @@ static bool daemon_hid_available = false;
 /**
  * Store the current layer (updated by layer_state_set_user).
  */
-static uint8_t current_layer = 0;
+static uint8_t current_layer = _NUMPAD;
 /**
  * If this is true, then a RAW HID message needs to be sent to the daemon to inform it that the keyboard has switched layers.
  */
@@ -291,9 +291,11 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     switch (current_layer) {
         case _NUMPAD:
             rgb_states[5] = (rgb_state_t){127,63,63};
+            set_numlock_led(host_keyboard_led_state().num_lock);
             break;
         case _MACRO0:
             rgb_states[5] = (rgb_state_t){0,0,0};
+            set_numlock_led(false);
             break;
         case _MACRO1:
             rgb_states[5] = (rgb_state_t){63,127,63};
@@ -481,7 +483,7 @@ void housekeeping_task_user(void) {
  * Update the state of the numlock LED
  */
 void set_numlock_led(bool numlock_state) {
-    if (numlock_state) {
+    if (numlock_state || current_layer != _NUMPAD) {
         rgb_states[4] = (rgb_state_t){0,0,0};
     } else {
         rgb_states[4] = (rgb_state_t){255,255,255};
