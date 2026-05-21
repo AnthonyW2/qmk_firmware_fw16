@@ -165,6 +165,13 @@ typedef struct {
 static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT] = {0};
 
 /**
+ * A flag used to update the LED states.
+ * Stores the number of LEDs to be updated.
+ * Decremented by rgb_matrix_indicators_advanced_user.
+ */
+static uint8_t rgb_state_dirty = RGB_MATRIX_LED_COUNT;
+
+/**
  * How many times to halve RGB components to reduce brightness.
  * A value of 0 is full brightness, 1 is half, etc.
  * 7 is the lowest brightness, reducing 0xFF to 0x01.
@@ -215,7 +222,7 @@ void keyboard_post_init_user(void) {
     //set_numlock_led(host_keyboard_led_state().num_lock);
     
     // Set the color of the top second-left RGB LED to red, indicating that the daemon has not established connection yet
-    rgb_states[2] = (rgb_state_t){255,0,0};
+    set_rgb_state(2, 255,0,0);
     
     // Tell the daemon that the macropad is available
     uint8_t message[RAW_EPSIZE] = {0};
@@ -229,7 +236,7 @@ void keyboard_post_init_user(void) {
  */
 void on_daemon_first_connect() {
     // Turn off the no-communication indicator
-    rgb_states[2] = (rgb_state_t){0,0,0};
+    set_rgb_state(2, 0,0,0);
     // Sync initial numlock state from the host
     set_numlock_led(host_keyboard_led_state().num_lock);
 }
@@ -245,20 +252,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 rgb_matrix_enable_noeeprom();
                 if (showing_daemon_status) {
                     // Reset status LEDs
-                    rgb_states[system_stat_led_ids[0]] = (rgb_state_t){0, 0, 0};
-                    rgb_states[system_stat_led_ids[1]] = (rgb_state_t){0, 0, 0};
-                    rgb_states[system_stat_led_ids[2]] = (rgb_state_t){0, 0, 0};
-                    rgb_states[system_stat_led_ids[3]] = (rgb_state_t){0, 0, 0};
+                    set_rgb_state(system_stat_led_ids[0], 0,0,0);
+                    set_rgb_state(system_stat_led_ids[1], 0,0,0);
+                    set_rgb_state(system_stat_led_ids[2], 0,0,0);
+                    set_rgb_state(system_stat_led_ids[3], 0,0,0);
                     set_numlock_led(host_keyboard_led_state().num_lock);
                     showing_daemon_status = false;
                 } else {
                     // Send a status request to the daemon on the host
                     pending_daemon_status_req = true;
                     // Show all red status LEDs while awaiting response
-                    rgb_states[system_stat_led_ids[0]] = (rgb_state_t){255, 0, 0};
-                    rgb_states[system_stat_led_ids[1]] = (rgb_state_t){255, 0, 0};
-                    rgb_states[system_stat_led_ids[2]] = (rgb_state_t){255, 0, 0};
-                    rgb_states[system_stat_led_ids[3]] = (rgb_state_t){255, 0, 0};
+                    set_rgb_state(system_stat_led_ids[0], 255,0,0);
+                    set_rgb_state(system_stat_led_ids[1], 255,0,0);
+                    set_rgb_state(system_stat_led_ids[2], 255,0,0);
+                    set_rgb_state(system_stat_led_ids[3], 255,0,0);
                     showing_daemon_status = true;
                 }
             }
@@ -290,24 +297,24 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     // Update RGB state according to the new layer
     switch (current_layer) {
         case _NUMPAD:
-            rgb_states[5] = (rgb_state_t){127,63,63};
+            set_rgb_state(5, 127,63,63);
             set_numlock_led(host_keyboard_led_state().num_lock);
             break;
         case _MACRO0:
-            rgb_states[5] = (rgb_state_t){0,0,0};
+            set_rgb_state(5, 0,0,0);
             set_numlock_led(false);
             break;
         case _MACRO1:
-            rgb_states[5] = (rgb_state_t){63,127,63};
+            set_rgb_state(5, 63,127,63);
             break;
         case _MONITOR:
-            rgb_states[5] = (rgb_state_t){63,63,127};
+            set_rgb_state(5, 63,63,127);
             break;
         case _APPLICATION:
-            rgb_states[5] = (rgb_state_t){127,63,127};
+            set_rgb_state(5, 127,63,127);
             break;
         default:
-            rgb_states[5] = (rgb_state_t){127,127,127};
+            set_rgb_state(5, 127,127,127);
             break;
     }
     
@@ -358,7 +365,7 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
         case hid_cmd_set_rgb:
             // Set RGB LED
             if (command_data[0] < RGB_MATRIX_LED_COUNT) {
-                rgb_states[command_data[0]] = (rgb_state_t){command_data[1], command_data[2], command_data[3]};
+                set_rgb_state(command_data[0], command_data[1], command_data[2], command_data[3]);
             }
             //response[1] = hid_cmd_set_rgb;
             //response[2] = rgb_states[index].r;
@@ -417,10 +424,10 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
         case hid_cmd_status_res:
             // Parse host system status response
             // [mem, cpu, gpu, gui, crashes, kernel]
-            rgb_states[system_stat_led_ids[0]] = (rgb_state_t){command_data[0], command_data[1], command_data[2]};
-            rgb_states[system_stat_led_ids[1]] = (rgb_state_t){command_data[3], 0, 0};
-            rgb_states[system_stat_led_ids[2]] = (rgb_state_t){command_data[4], 0, 0};
-            rgb_states[system_stat_led_ids[3]] = (rgb_state_t){command_data[5], 0, 0};
+            set_rgb_state(system_stat_led_ids[0], command_data[0], command_data[1], command_data[2]);
+            set_rgb_state(system_stat_led_ids[1], command_data[3], 0, 0);
+            set_rgb_state(system_stat_led_ids[2], command_data[4], 0, 0);
+            set_rgb_state(system_stat_led_ids[3], command_data[5], 0, 0);
             showing_daemon_status = true;
             pending_daemon_status_res = false;
             return;
@@ -438,15 +445,22 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
  * We're using custom indicators instead of effects because we need more control.
  */
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    for (uint8_t i = led_min; i < led_max; i++) {
-        rgb_matrix_set_color(
-            i,
-            rgb_states[i].r >> rgb_brightness_shift,
-            rgb_states[i].g >> rgb_brightness_shift,
-            rgb_states[i].b >> rgb_brightness_shift
-        );
+    // Only refresh if needed
+    if (rgb_state_dirty > 0) {
+        for (uint8_t i = led_min; i < led_max; i++) {
+            rgb_matrix_set_color(
+                i,
+                rgb_states[i].r >> rgb_brightness_shift,
+                rgb_states[i].g >> rgb_brightness_shift,
+                rgb_states[i].b >> rgb_brightness_shift
+            );
+            // Decrement the dirty flag
+            if (rgb_state_dirty > 0) {
+                rgb_state_dirty --;
+            }
+        }
     }
-
+    
     return false;
 }
 
@@ -480,13 +494,24 @@ void housekeeping_task_user(void) {
 }
 
 /**
+ * Change the state of one RGB LED
+ */
+void set_rgb_state(uint8_t key, uint8_t r, uint8_t g, uint8_t b) {
+    // Update the state
+    rgb_states[key] = (rgb_state_t){r,g,b};
+    
+    // Set dirty flag to refresh all LEDs
+    rgb_state_dirty = RGB_MATRIX_LED_COUNT;
+}
+
+/**
  * Update the state of the numlock LED
  */
 void set_numlock_led(bool numlock_state) {
     if (numlock_state || current_layer != _NUMPAD) {
-        rgb_states[4] = (rgb_state_t){0,0,0};
+        set_rgb_state(4, 0,0,0);
     } else {
-        rgb_states[4] = (rgb_state_t){255,255,255};
+        set_rgb_state(4, 255,255,255);
     }
 }
 
