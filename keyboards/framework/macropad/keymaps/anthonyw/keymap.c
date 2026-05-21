@@ -53,7 +53,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         C(KC_F21),    C(KC_F22),    C(KC_F23),    C(KC_F24)
     ),
     [_MACRO1] = LAYOUT(
-        TO(_MONITOR), KC_TRNS,     KC_TRNS,     KC_TRNS,
+        TO(_MONITOR), KC_TRNS,      KC_TRNS,      KC_TRNS,
         C(S(KC_F17)), C(S(KC_F18)), C(S(KC_F19)), C(S(KC_F20)),
         C(S(KC_F21)), C(S(KC_F22)), C(S(KC_F23)), C(S(KC_F24)),
         C(KC_F13),    C(KC_F14),    C(KC_F15),    C(KC_F16),
@@ -212,7 +212,7 @@ void keyboard_post_init_user(void) {
     rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
     
     // Sync initial numlock state from the host
-    set_numlock_led(host_keyboard_led_state().num_lock);
+    //set_numlock_led(host_keyboard_led_state().num_lock);
     
     // Set the color of the top second-left RGB LED to red, indicating that the daemon has not established connection yet
     rgb_states[2] = (rgb_state_t){255,0,0};
@@ -222,6 +222,16 @@ void keyboard_post_init_user(void) {
     message[0] = CUSTOM_HID_PREFIX;
     message[1] = hid_cmd_ping;
     raw_hid_send(message, RAW_EPSIZE);
+}
+
+/**
+ * This function is executed when the daemon is first heard from (since macropad init)
+ */
+void on_daemon_first_connect() {
+    // Turn off the no-communication indicator
+    rgb_states[2] = (rgb_state_t){0,0,0};
+    // Sync initial numlock state from the host
+    set_numlock_led(host_keyboard_led_state().num_lock);
 }
 
 /**
@@ -311,28 +321,28 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
     uint8_t command_id = data[0];
     uint8_t *command_data = &(data[1]);
     
-    uint8_t response[RAW_EPSIZE] = {0};
+    // Update daemon availability and execute on_daemon_first_connect
+    if (!daemon_hid_initialised) {
+        on_daemon_first_connect();
+    }
+    daemon_hid_initialised = true;
+    daemon_hid_available = true;
     
     // Our custom communication namespace is CUSTOM_RAW_HID_PREFIX
+    uint8_t response[RAW_EPSIZE] = {0};
     response[0] = CUSTOM_HID_PREFIX;
     
     // Start by identifying the type of command received
     switch(command_id) {
         case hid_cmd_ping:
-            // Ping received, daemon must be available
-            daemon_hid_initialised = true;
-            daemon_hid_available = true;
-            rgb_states[2] = (rgb_state_t){0,0,0};
+            // Ping received
             // Acknowledge the ping
             response[1] = hid_cmd_ack;
             break;
         
-        case hid_cmd_ack:
-            // Ping acknowledged, daemon must be available
-            daemon_hid_initialised = true;
-            daemon_hid_available = true;
-            rgb_states[2] = (rgb_state_t){0,0,0};
-            return;
+        //case hid_cmd_ack:
+        //    // Ping acknowledged
+        //    return;
         
         case hid_cmd_set_layer:
             // Set layer
