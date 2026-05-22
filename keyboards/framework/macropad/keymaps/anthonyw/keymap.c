@@ -165,13 +165,6 @@ typedef struct {
 static rgb_state_t rgb_states[RGB_MATRIX_LED_COUNT] = {0};
 
 /**
- * A flag used to update the LED states.
- * Stores the number of LEDs to be updated.
- * Decremented by rgb_matrix_indicators_advanced_user.
- */
-static uint8_t rgb_state_dirty = RGB_MATRIX_LED_COUNT;
-
-/**
  * How many times to halve RGB components to reduce brightness.
  * A value of 0 is full brightness, 1 is half, etc.
  * 7 is the lowest brightness, reducing 0xFF to 0x01.
@@ -445,20 +438,13 @@ void handle_custom_hid(uint8_t *data, uint8_t length) {
  * We're using custom indicators instead of effects because we need more control.
  */
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    // Only refresh if needed
-    if (rgb_state_dirty > 0) {
-        for (uint8_t i = led_min; i < led_max; i++) {
-            rgb_matrix_set_color(
-                i,
-                rgb_states[i].r >> rgb_brightness_shift,
-                rgb_states[i].g >> rgb_brightness_shift,
-                rgb_states[i].b >> rgb_brightness_shift
-            );
-            // Decrement the dirty flag
-            if (rgb_state_dirty > 0) {
-                rgb_state_dirty --;
-            }
-        }
+    for (uint8_t i = led_min; i < led_max; i++) {
+        rgb_matrix_set_color(
+            i,
+            rgb_states[i].r >> rgb_brightness_shift,
+            rgb_states[i].g >> rgb_brightness_shift,
+            rgb_states[i].b >> rgb_brightness_shift
+        );
     }
     
     return false;
@@ -499,9 +485,6 @@ void housekeeping_task_user(void) {
 void set_rgb_state(uint8_t key, uint8_t r, uint8_t g, uint8_t b) {
     // Update the state
     rgb_states[key] = (rgb_state_t){r,g,b};
-    
-    // Set dirty flag to refresh all LEDs
-    rgb_state_dirty = RGB_MATRIX_LED_COUNT;
 }
 
 /**
